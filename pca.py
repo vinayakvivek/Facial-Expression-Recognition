@@ -6,12 +6,11 @@ from sklearn import decomposition as dec
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-fields = nm.genfromtxt('fer2013/fer2013.csv',delimiter=',',dtype=None)
+fields = nm.genfromtxt('data/fer2013.csv',delimiter=',',dtype=None)
 
 images=[]
 
 for i in range(1,len(fields)):
-    
     images.append(nm.array(fields[i][1].split(" ")).astype(nm.float))
 
 images=nm.array(images)
@@ -24,8 +23,6 @@ images=pca.transform(images)
 fig=plt.figure()
 
 ax = fig.add_subplot(111, projection='3d')
-
-
 
 
 clf = svm.SVC(kernel='rbf', gamma=2)
