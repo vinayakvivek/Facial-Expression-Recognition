@@ -329,25 +329,3 @@ plt.show()
 #######################################
 
 
-def test_external_image(image_path, model_path):
-    image = cv.imread(image_path)
-    gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    clahe_image = clahe.apply(gray)
-
-    plt.imshow(clahe_image)
-    plt.show()
-
-    features = get_landmarks(clahe_image)
-
-    clf = joblib.load(model_path)
-    predicted_labels = clf.predict([features])
-
-    print(categories[predicted_labels[0]])
-    print(pd.DataFrame(clf.predict_proba([features]), columns=categories))
-
-
-test_external_image('test_images/happily-surprised.jpg', model_dir + '/XGB_temp.pkl')
-
-
-
