@@ -2,66 +2,25 @@ import os, shutil, sys, time, re, glob, csv
 
 # Get images, labels tuple for CK+ datset
 def importCKPlusDataset(dir = 'CKPlus', categories = None, includeNeutral = False, contemptAs = None):
-    ############################################################################
-    # Function: importCKPlusDataset
-    # Depending on preferences, this ranges from 309 - 920 images and labels
-    #    - 309 labeled images
-    #    - 18 more "Contempt" images (not in our vocabulary)
-    #    - 593 neutral images
-    # 
-    # For this to work, make sure your CKPlus dataset is formatted like this:
-    # CKPlus = root (or whatever is in your 'dir' variable)
-    # CKPlus/CKPlus_Images = Root for all image files (no other file types here)
-    #    Example image path:
-    #    CKPlus/CKPlus_Images/S005/001/S005_001_00000011.png
-    # 
-    # CKPlus/CKPlus_Labels = Root for all image labels (no other file types)
-    #    Example label path:
-    #    CKPlus/CKPlus_Labels/S005/001/S005_001_00000011_emotion.png
-    #
-    # CKPlus/* - anything else in this directory is ignored, as long as it
-    # is not in the _Images or _Labels subdirectories
-    # 
-    # Optional inputs:
-    # dir - Custom root directory for CKPlus dataset (if not 'CKPlus')
-    #
-    # includeNeutral - Boolean to include neutral pictures or not
-    #    Note: Every sequence begins with neutral photos, so neutral photos
-    #    greatly outnumber all other combined (approximately 593 to 327)
-    #
-    # contemptAs - Since it's not in our vocabulary, by default all pictures
-    # labeled "Contempt" are discarded. But if you put a string here, e.g.
-    # "Disgust", pictures labeled "Contempt" will be lumped in with "Disgust"
-    # instead of being discarded.
-    #
-    #
-	# RETURN VALUES:
-	# images, labels = List of image file paths, list of numeric labels
-	# according to EitW numbers
-	#
-	# Author: Dan Duncan
-	#
-	############################################################################
-	print(includeNeutral)
 
-	# Note: "Neutral" is not labeled in the CK+ dataset
-	categoriesCK = ['Angry', 'Contempt', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise']
+    # Note: "Neutral" is not labeled in the CK+ dataset
+    categoriesCK = ['Angry', 'Contempt', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise']
 
-	if categories is None:
-	    categoriesEitW = [ 'Angry' , 'Disgust' , 'Fear' , 'Happy'  , 'Neutral' ,  'Sad' , 'Surprise']
-	else:
-	    categoriesEitW = categories
+    if categories is None:
+        categoriesEitW = [ 'Angry' , 'Disgust' , 'Fear' , 'Happy'  , 'Neutral' ,  'Sad' , 'Surprise']
+    else:
+        categoriesEitW = categories
 
-	# Root directories for images and labels. Should have no other .txt or .png files present
-	dirImages = dir + '/CKPlus_Images'
-	dirLabels = dir + '/CKPlus_Labels'
+    # Root directories for images and labels. Should have no other .txt or .png files present
+    dirImages = dir + '/CKPlus_Images'
+    dirLabels = dir + '/CKPlus_Labels'
 
-	if contemptAs is not None:
-		# Verify a valid string was supplied
-		try:
-	    	ind = categoriesEitW.index(contemptAs)
-	    except ValueError:
-	    	raise ValueError("\nError in importCKPlusDataset(): contemptAs = '" + contemptAs + "' is not a valid category. Exiting.\n")
+    if contemptAs is not None:
+        # Verify a valid string was supplied
+        try:
+            ind = categoriesEitW.index(contemptAs)
+        except ValueError:
+            raise ValueError("\nError in importCKPlusDataset(): contemptAs = '" + contemptAs + "' is not a valid category. Exiting.\n")
 
     # Get all possible label and image filenames
     imageFiles = glob.glob(dirImages + '/*/*/*.png')
@@ -116,27 +75,6 @@ def importCKPlusDataset(dir = 'CKPlus', categories = None, includeNeutral = Fals
                 # Discard "Contempt" image
                 contemptImages.append(curImage)
 
-    # if includeNeutral:
-    #     # Add all neutral images to our list too:
-    #     # The first image in every series is neutral
-    #     neutralPattern = '_00000001.png'
-    #     neutralInd = categoriesEitW.index('Neutral')
-    #     neutralImages = []
-    #     neutralLabels = []
-    #     neutralLabelNames = []
-
-    #     for imgStr in imageFiles:
-    #         if neutralPattern in imgStr:
-    #             neutralImages.append(imgStr)
-    #             neutralLabels.append(neutralInd)
-    #             neutralLabelNames.append('Neutral')
-
-    #     # Combine lists of labeled and neutral images
-    #     images = labeledImages + neutralImages
-    #     labels = labels + neutralLabels
-    #     labelNames = labelNames + neutralLabelNames
-
-    # else:
     images = labeledImages
 
     # For testing only:
@@ -158,7 +96,6 @@ def importDataset(dir, dataset, categories):
         jaffe_categories_map = {
             'HA': categories.index('Happy'),
             'SA': categories.index('Sad'),
-            'NE': categories.index('Neutral'),
             'AN': categories.index('Angry'),
             'FE': categories.index('Fear'),
             'DI': categories.index('Disgust'),
@@ -170,8 +107,9 @@ def importDataset(dir, dataset, categories):
         for img in imgList:
             if os.path.isdir(img):
                 continue
-            key = img.split('.')[1][0:2]
-            labels.append(jaffe_categories_map[key])
+            key = img.split('.')[3][0:2]
+            if (key in jaffe_categories_map):
+                labels.append(jaffe_categories_map[key])
 
     elif dataset.lower() == 'ckplus':
         # Pathnames and labels for all images
